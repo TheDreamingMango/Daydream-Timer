@@ -1,0 +1,42 @@
+# Stop Daydreaming
+
+Mobile Flutter app (Android and iOS) that interrupts maladaptive daydreaming by making elapsed time impossible to ignore. Keep it fast, calm, local-first, and easy to understand.
+
+A sibling macOS terminal app lives in `~/Code/focus`. Same problem, different platform. Do not port Focus's Ollama grounding prompts unless the user asks.
+
+## Product
+
+The user starts a timer that keeps running in the background. Every minute, the app speaks the minute it is on: "one minute", "two minutes", and so on.
+
+Music and other audio are common triggers. The announcement should cut through whatever the user is already hearing. Pause or duck other audio for the spoken minute, then restore it immediately when the announcement ends. Never leave the user's music stopped.
+
+The point is mindfulness of time passing — and of time lost — while daydreaming. Do not shame, lecture, or gamify.
+
+## Core Contract
+
+- Spoken copy is the cardinal minute in words plus "minute"/"minutes". Not "minute 1", not just "1".
+- Announcements fire on whole-minute boundaries and must not overlap.
+- The timer survives backgrounding, screen lock, and other apps in the foreground. A timer that only speaks while this app is visible has failed.
+- Other audio is interrupted only for the announcement, then restored right away.
+- Start/stop should be obvious and one tap. No accounts, no cloud, no network requirement.
+
+## Working Agreements
+
+- Prefer the smallest clear change. Avoid abstractions until they remove real duplication.
+- Keep user-facing language brief, compassionate, and non-judgmental.
+- Treat audio session, background execution, and speech as the product, not extras. UI is secondary to a reliable spoken interrupt.
+- Add dependencies only when Flutter or existing packages cannot do the job.
+- Do not add Focus-style LLM prompts, stats dashboards, or social features unless asked.
+
+## Current Shape
+
+The repo is still a Flutter scaffold (`lib/main.dart` shows "Hello"). Build toward the product above; do not preserve the placeholder UI for its own sake.
+
+## Verification
+
+```sh
+flutter analyze
+flutter test
+```
+
+For timer, speech, backgrounding, or audio-interruption changes, also run on a real device or emulator and check: start/stop, minute announcements, app backgrounded, and that other audio resumes after each announcement.
