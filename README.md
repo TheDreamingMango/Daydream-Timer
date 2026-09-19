@@ -5,17 +5,31 @@ Minimal Flutter app for **Android** and **iOS**.
 ## Run
 
 ```bash
+cd ~/Code/Stop-Daydreaming
+export JAVA_HOME="/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
+export ANDROID_HOME="/opt/homebrew/share/android-commandlinetools"
+export ANDROID_SDK_ROOT="$ANDROID_HOME"
+export PATH="/opt/homebrew/bin:/opt/homebrew/opt/openjdk/bin:$ANDROID_HOME/platform-tools:$PATH"
+
 flutter pub get
-flutter run   # pick a connected device / emulator
+flutter devices
+flutter run   # pick an Android emulator/device or iOS simulator
 ```
 
-### Tooling
+## Tooling on this Mac
 
-- **Flutter:** `brew install --cask flutter`
-- **Android:** install [Android Studio](https://developer.android.com/studio), open it once to install the SDK, then accept licenses: `flutter doctor --android-licenses`
-- **iOS:** install full [Xcode](https://developer.apple.com/xcode/), then:
-  ```bash
-  sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
-  sudo xcodebuild -runFirstLaunch
-  brew install cocoapods
-  ```
+Already set up:
+- Flutter (`brew install --cask flutter`)
+- Android Studio → `~/Applications`
+- Android SDK + licenses (`android-commandlinetools`, platform 36)
+- CocoaPods
+- OpenJDK (Homebrew)
+
+**iOS still needs one admin step** (Xcode is installed, but CLI points at Command Line Tools):
+
+```bash
+sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer
+sudo xcodebuild -runFirstLaunch
+```
+
+Then open Simulator (`open -a Simulator`) and run `flutter run`.
