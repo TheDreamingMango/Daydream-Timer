@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'app_theme.dart';
 import 'session_clock.dart';
 import 'session_controller.dart';
 import 'session_interval.dart';
-
-const _bg = Color(0xFF0A0A0A);
-const _muted = Color(0xFF6E6E6E);
-const _idleFill = Color(0xFF9A9A9A);
-const _idleLine = Color(0xFF3A3A3A);
-const _cyan = Color(0xFF00E5C3);
-const _text = Color(0xFFF2F2F2);
-const _error = Color(0xFFE57373);
+import 'theme_controller.dart';
 
 class TimerScreen extends StatefulWidget {
   const TimerScreen({super.key, this.controller});
@@ -34,14 +28,12 @@ class _TimerScreenState extends State<TimerScreen> {
     SystemChrome.setPreferredOrientations(const [
       DeviceOrientation.portraitUp,
     ]);
-    SystemChrome.setSystemUIOverlayStyle(
-      const SystemUiOverlayStyle(
-        statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: _bg,
-        systemNavigationBarIconBrightness: Brightness.light,
-      ),
-    );
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _syncSystemUi(AppPalette.of(context));
   }
 
   @override
@@ -62,95 +54,169 @@ class _TimerScreenState extends State<TimerScreen> {
     _controller.toggle();
   }
 
+  void _syncSystemUi(AppPalette palette) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final overlay = dark ? Brightness.light : Brightness.dark;
+    SystemChrome.setSystemUIOverlayStyle(
+      SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarBrightness: dark ? Brightness.dark : Brightness.light,
+        statusBarIconBrightness: overlay,
+        systemNavigationBarColor: palette.bg,
+        systemNavigationBarIconBrightness: overlay,
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
     final running = _controller.running;
-    final accent = running ? _cyan : _idleLine;
+    final accent = running ? palette.accent : palette.idleLine;
     final status = _controller.error ?? (running ? 'running' : 'stopped');
     final statusColor = _controller.error != null
-        ? _error
-        : (running ? _cyan : _muted);
+        ? palette.error
+        : (running ? palette.accent : palette.muted);
     final footer = running ? 'tap to stop' : 'tap to start';
 
     return Scaffold(
-      backgroundColor: _bg,
+      backgroundColor: palette.bg,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(22, 16, 22, 20),
+          padding: const EdgeInsets.fromLTRB(22, 4, 22, 20),
           child: LayoutBuilder(
             builder: (context, constraints) {
               return Center(
                 child: SizedBox(
                   width: constraints.maxWidth.clamp(0, 520),
                   height: constraints.maxHeight,
-                  child: GestureDetector(
-                    key: const Key('clock-frame'),
-                    behavior: HitTestBehavior.opaque,
-                    onTap: _toggle,
-                    child: AnimatedContainer(
-                      duration: const Duration(milliseconds: 220),
-                      curve: Curves.easeOut,
-                      decoration: BoxDecoration(
-                        color: _bg,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: accent, width: 1.5),
-                        boxShadow: running
-                            ? [
-                                BoxShadow(
-                                  color: _cyan.withValues(alpha: 0.16),
-                                  blurRadius: 28,
-                                  spreadRadius: 1,
+                  child: Column(
+                    children: [
+                      const Align(
+                        alignment: Alignment.centerRight,
+                        child: _ThemeToggle(),
+                      ),
+                      Expanded(
+                        child: GestureDetector(
+                          key: const Key('clock-frame'),
+                          behavior: HitTestBehavior.opaque,
+                          onTap: _toggle,
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 220),
+                            curve: Curves.easeOut,
+                            decoration: BoxDecoration(
+                              color: palette.bg,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: accent, width: 1.5),
+                              boxShadow: running
+                                  ? [
+                                      BoxShadow(
+                                        color: palette.glow,
+                                        blurRadius: 28,
+                                        spreadRadius: 1,
+                                      ),
+                                    ]
+                                  : const [],
+                            ),
+                            padding: const EdgeInsets.fromLTRB(24, 32, 24, 28),
+                            child: Column(
+                              children: [
+                                Text(
+                                  'stop daydreaming',
+                                  style: _mono(
+                                    color: running
+                                        ? palette.accent
+                                        : palette.muted,
+                                    size: 14,
+                                    weight: FontWeight.w500,
+                                    letterSpacing: 2.8,
+                                  ),
                                 ),
-                              ]
-                            : const [],
+                                Expanded(
+                                  child: Center(
+                                    child: _ElapsedReadout(
+                                      elapsed: _controller.elapsed,
+                                      color: running
+                                          ? palette.text
+                                          : palette.idleFill,
+                                      running: running,
+                                    ),
+                                  ),
+                                ),
+                                _StatusLine(
+                                  label: status,
+                                  color: statusColor,
+                                  filled: running && _controller.error == null,
+                                ),
+                                const SizedBox(height: 10),
+                                Text(
+                                  footer,
+                                  style: _mono(
+                                    color: palette.muted,
+                                    size: 15,
+                                    letterSpacing: 1.4,
+                                  ),
+                                ),
+                                if (isFastMinutes) ...[
+                                  const SizedBox(height: 16),
+                                  const _DebugChip(),
+                                ],
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
-                      padding: const EdgeInsets.fromLTRB(24, 32, 24, 28),
-                      child: Column(
-                        children: [
-                          Text(
-                            'stop daydreaming',
-                            style: _mono(
-                              color: running ? _cyan : _muted,
-                              size: 12,
-                              weight: FontWeight.w500,
-                              letterSpacing: 3.2,
-                            ),
-                          ),
-                          Expanded(
-                            child: Center(
-                              child: _ElapsedReadout(
-                                elapsed: _controller.elapsed,
-                                color: running ? _text : _idleFill,
-                                running: running,
-                              ),
-                            ),
-                          ),
-                          _StatusLine(
-                            label: status,
-                            color: statusColor,
-                            filled: running && _controller.error == null,
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            footer,
-                            style: _mono(
-                              color: _muted,
-                              size: 13,
-                              letterSpacing: 1.4,
-                            ),
-                          ),
-                          if (isFastMinutes) ...[
-                            const SizedBox(height: 16),
-                            const _DebugChip(),
-                          ],
-                        ],
-                      ),
-                    ),
+                    ],
                   ),
                 ),
               );
             },
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ThemeToggle extends StatelessWidget {
+  const _ThemeToggle();
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
+    final theme = ThemeScope.of(context);
+    final toLight = theme.isDark;
+
+    return IconButton(
+      key: const Key('theme-toggle'),
+      tooltip: toLight ? 'light mode' : 'dark mode',
+      visualDensity: VisualDensity.compact,
+      padding: const EdgeInsets.fromLTRB(10, 4, 2, 8),
+      constraints: const BoxConstraints(minWidth: 44, minHeight: 44),
+      splashColor: Colors.transparent,
+      highlightColor: palette.accent.withValues(alpha: 0.1),
+      onPressed: () {
+        HapticFeedback.lightImpact();
+        theme.toggle();
+      },
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 220),
+        switchInCurve: Curves.easeOut,
+        switchOutCurve: Curves.easeIn,
+        transitionBuilder: (child, animation) {
+          return FadeTransition(
+            opacity: animation,
+            child: ScaleTransition(
+              scale: Tween<double>(begin: 0.86, end: 1).animate(animation),
+              child: child,
+            ),
+          );
+        },
+        child: Icon(
+          toLight ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+          key: ValueKey(toLight),
+          size: 20,
+          color: palette.muted,
         ),
       ),
     );
@@ -270,7 +336,7 @@ class _StatusLine extends StatelessWidget {
           label,
           style: _mono(
             color: color,
-            size: 14,
+            size: 16,
             weight: FontWeight.w500,
             letterSpacing: 1.6,
           ),
@@ -285,16 +351,17 @@ class _DebugChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
     return DecoratedBox(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: _idleLine),
+        border: Border.all(color: palette.idleLine),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
         child: Text(
           'debug  5s',
-          style: _mono(color: _muted, size: 11, letterSpacing: 1),
+          style: _mono(color: palette.muted, size: 12, letterSpacing: 1),
         ),
       ),
     );
