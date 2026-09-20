@@ -30,7 +30,7 @@ The point is mindfulness of time passing — and of time lost — while daydream
 
 ## Current Shape
 
-The repo is still a Flutter scaffold (`lib/main.dart` shows "Hello"). Build toward the product above; do not preserve the placeholder UI for its own sake.
+One TUI screen (`lib/timer_screen.dart`): tap the clock frame to start/stop. `SessionClock` is Stopwatch-based and resets on stop. Spoken minutes come from `Speaker` (`flutter_tts` + `audio_session` ducking). On Android, clock+TTS live in a `mediaPlayback` foreground-service isolate (`lib/session_task.dart`). On iOS, they run in the UI isolate with `audio` background mode and no silent keep-alive loop.
 
 ## Verification
 
