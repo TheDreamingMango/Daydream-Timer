@@ -1,10 +1,7 @@
 /// Stopwatch-backed session time. Stopped elapsed is always zero; the next
 /// start is a new session (reset, not pause).
 class SessionClock {
-  SessionClock({
-    this.interval = const Duration(minutes: 1),
-    this.readElapsed,
-  });
+  SessionClock({this.interval = const Duration(minutes: 1), this.readElapsed});
 
   final Duration interval;
   final Duration Function()? readElapsed;

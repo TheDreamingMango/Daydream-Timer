@@ -1,6 +1,6 @@
 # Stop Daydreaming
 
-Minimal Flutter app for **Android** and **iOS**. One screen: tap the clock to start a timer that speaks each whole minute ("one minute", "two minutes") even when the app is backgrounded. Debug builds use a 5s interval so you can hear speech without waiting a minute (`--dart-define=FAST_MINUTES=false` restores 60s).
+Minimal Flutter app for **Android** and **iOS**. One screen: tap the clock to start a timer that speaks each whole minute ("one minute", "two minutes") even when the app is backgrounded. Every two minutes it also reads a grounding quote from a local list, on screen and out loud.
 
 ## Run
 

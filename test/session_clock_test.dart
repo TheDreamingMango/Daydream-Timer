@@ -63,6 +63,9 @@ void main() {
   test('formatElapsed uses H:MM:SS after one hour', () {
     expect(formatElapsed(Duration.zero), '00:00');
     expect(formatElapsed(const Duration(minutes: 1, seconds: 5)), '01:05');
-    expect(formatElapsed(const Duration(hours: 1, minutes: 2, seconds: 3)), '1:02:03');
+    expect(
+      formatElapsed(const Duration(hours: 1, minutes: 2, seconds: 3)),
+      '1:02:03',
+    );
   });
 }

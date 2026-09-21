@@ -4,7 +4,6 @@ import 'package:flutter/services.dart';
 import 'app_theme.dart';
 import 'session_clock.dart';
 import 'session_controller.dart';
-import 'session_interval.dart';
 import 'theme_controller.dart';
 
 class TimerScreen extends StatefulWidget {
@@ -25,9 +24,7 @@ class _TimerScreenState extends State<TimerScreen> {
     _controller = widget.controller ?? SessionController();
     _controller.addListener(_onChange);
     _controller.attach();
-    SystemChrome.setPreferredOrientations(const [
-      DeviceOrientation.portraitUp,
-    ]);
+    SystemChrome.setPreferredOrientations(const [DeviceOrientation.portraitUp]);
   }
 
   @override
@@ -134,12 +131,29 @@ class _TimerScreenState extends State<TimerScreen> {
                                 ),
                                 Expanded(
                                   child: Center(
-                                    child: _ElapsedReadout(
-                                      elapsed: _controller.elapsed,
-                                      color: running
-                                          ? palette.text
-                                          : palette.idleFill,
-                                      running: running,
+                                    child: Column(
+                                      mainAxisSize: MainAxisSize.min,
+                                      children: [
+                                        _ElapsedReadout(
+                                          elapsed: _controller.elapsed,
+                                          color: running
+                                              ? palette.text
+                                              : palette.idleFill,
+                                          running: running,
+                                        ),
+                                        if (running &&
+                                            (_controller.quote ?? '')
+                                                .isNotEmpty)
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              top: 20,
+                                            ),
+                                            child: _QuoteLine(
+                                              text: _controller.quote!,
+                                              color: palette.muted,
+                                            ),
+                                          ),
+                                      ],
                                     ),
                                   ),
                                 ),
@@ -157,10 +171,6 @@ class _TimerScreenState extends State<TimerScreen> {
                                     letterSpacing: 1.4,
                                   ),
                                 ),
-                                if (isFastMinutes) ...[
-                                  const SizedBox(height: 16),
-                                  const _DebugChip(),
-                                ],
                               ],
                             ),
                           ),
@@ -277,6 +287,30 @@ class _ElapsedReadout extends StatelessWidget {
   }
 }
 
+class _QuoteLine extends StatelessWidget {
+  const _QuoteLine({required this.text, required this.color});
+
+  final String text;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      key: const Key('quote'),
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: 'IBMPlexMono',
+        fontStyle: FontStyle.italic,
+        color: color,
+        fontSize: 15,
+        height: 1.4,
+        fontWeight: FontWeight.w400,
+      ),
+    );
+  }
+}
+
 class _ClockColon extends StatelessWidget {
   const _ClockColon({required this.color, required this.height});
 
@@ -286,10 +320,10 @@ class _ClockColon extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     Widget dot() => Container(
-          width: 8,
-          height: 8,
-          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-        );
+      width: 8,
+      height: 8,
+      decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+    );
 
     return SizedBox(
       width: 26,
@@ -342,28 +376,6 @@ class _StatusLine extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _DebugChip extends StatelessWidget {
-  const _DebugChip();
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppPalette.of(context);
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(4),
-        border: Border.all(color: palette.idleLine),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-        child: Text(
-          'debug  5s',
-          style: _mono(color: palette.muted, size: 12, letterSpacing: 1),
-        ),
-      ),
     );
   }
 }

@@ -15,11 +15,7 @@ Future<void> main() async {
 }
 
 class StopDaydreamingApp extends StatefulWidget {
-  const StopDaydreamingApp({
-    super.key,
-    this.controller,
-    this.themeController,
-  });
+  const StopDaydreamingApp({super.key, this.controller, this.themeController});
 
   final SessionController? controller;
   final ThemeController? themeController;

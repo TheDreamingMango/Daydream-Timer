@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-/// Serial spoken announcements. Ducks other audio only for the utterance.
+/// Serial spoken announcements. Ducks other audio only for each burst.
 class Speaker {
   FlutterTts? _tts;
   AudioSession? _session;
@@ -19,27 +19,26 @@ class Speaker {
     await tts.setLanguage('en-US');
     if (Platform.isIOS) {
       await tts.setSharedInstance(true);
-      await tts.setIosAudioCategory(
-        IosTextToSpeechAudioCategory.playback,
-        [
-          IosTextToSpeechAudioCategoryOptions.duckOthers,
-          IosTextToSpeechAudioCategoryOptions.interruptSpokenAudioAndMixWithOthers,
-        ],
-        IosTextToSpeechAudioMode.voicePrompt,
-      );
+      await tts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback, [
+        IosTextToSpeechAudioCategoryOptions.duckOthers,
+        IosTextToSpeechAudioCategoryOptions
+            .interruptSpokenAudioAndMixWithOthers,
+      ], IosTextToSpeechAudioMode.voicePrompt);
       await tts.autoStopSharedSession(true);
     } else if (Platform.isAndroid) {
       final session = await AudioSession.instance;
       await session.configure(
         const AudioSessionConfiguration(
           avAudioSessionCategory: AVAudioSessionCategory.playback,
-          avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.duckOthers,
+          avAudioSessionCategoryOptions:
+              AVAudioSessionCategoryOptions.duckOthers,
           avAudioSessionMode: AVAudioSessionMode.spokenAudio,
           androidAudioAttributes: AndroidAudioAttributes(
             contentType: AndroidAudioContentType.speech,
             usage: AndroidAudioUsage.assistanceSonification,
           ),
-          androidAudioFocusGainType: AndroidAudioFocusGainType.gainTransientMayDuck,
+          androidAudioFocusGainType:
+              AndroidAudioFocusGainType.gainTransientMayDuck,
           androidWillPauseWhenDucked: false,
         ),
       );
@@ -49,34 +48,52 @@ class Speaker {
     _ready = true;
   }
 
-  Future<void> speak(String text) {
-    if (_stopped || text.isEmpty) return Future.value();
-    _chain = _chain.then((_) => _utter(text));
+  Future<void> speak(String text) => speakBurst([text]);
+
+  /// Speaks [lines] in order under one duck so a minute + quote stay one burst.
+  Future<void> speakBurst(Iterable<String> lines) {
+    if (_stopped) return Future.value();
+    final texts = [
+      for (final line in lines)
+        if (line.isNotEmpty) line,
+    ];
+    if (texts.isEmpty) return Future.value();
+    _chain = _chain.then((_) => _utterBurst(texts));
     return _chain;
   }
 
-  Future<void> _utter(String text) async {
+  Future<void> _utterBurst(List<String> texts) async {
     if (_stopped || !_ready) return;
     try {
-      final session = _session;
-      if (session != null) {
-        await session.setActive(
-          true,
-          androidAudioFocusGainType: AndroidAudioFocusGainType.gainTransientMayDuck,
-        );
-      }
-      await _tts?.speak(text);
-    } catch (_) {
-      // Fail quietly: the clock still runs.
-    } finally {
-      final session = _session;
-      if (session != null) {
+      await _setActive(true);
+      for (final text in texts) {
+        if (_stopped) return;
         try {
-          await session.setActive(false);
+          await _tts?.speak(text);
         } catch (_) {
-          // Ignore deactivation failure.
+          // Fail quietly: the clock still runs.
         }
       }
+    } finally {
+      await _setActive(false);
+    }
+  }
+
+  Future<void> _setActive(bool active) async {
+    final session = _session;
+    if (session == null) return;
+    try {
+      if (active) {
+        await session.setActive(
+          true,
+          androidAudioFocusGainType:
+              AndroidAudioFocusGainType.gainTransientMayDuck,
+        );
+      } else {
+        await session.setActive(false);
+      }
+    } catch (_) {
+      // Ignore focus failure.
     }
   }
 

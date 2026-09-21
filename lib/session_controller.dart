@@ -4,9 +4,8 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
-import 'minute_copy.dart';
+import 'session_announcer.dart';
 import 'session_clock.dart';
-import 'session_interval.dart';
 import 'session_task.dart';
 import 'speaker.dart';
 
@@ -19,6 +18,7 @@ class SessionController extends ChangeNotifier {
 
   bool running = false;
   Duration elapsed = Duration.zero;
+  String? quote;
   String? error;
   bool _busy = false;
   bool _attached = false;
@@ -65,6 +65,7 @@ class SessionController extends ChangeNotifier {
       error = 'could not start';
       running = false;
       elapsed = Duration.zero;
+      quote = null;
       notifyListeners();
     } finally {
       _busy = false;
@@ -88,6 +89,7 @@ class SessionController extends ChangeNotifier {
     } finally {
       running = false;
       elapsed = Duration.zero;
+      quote = null;
       error = null;
       _busy = false;
       notifyListeners();
@@ -131,7 +133,8 @@ class SessionController extends ChangeNotifier {
   Future<void> _startAndroid() async {
     await attach();
     _initService();
-    final permission = await FlutterForegroundTask.checkNotificationPermission();
+    final permission =
+        await FlutterForegroundTask.checkNotificationPermission();
     if (permission != NotificationPermission.granted) {
       final after = await FlutterForegroundTask.requestNotificationPermission();
       if (after != NotificationPermission.granted) {
@@ -156,23 +159,27 @@ class SessionController extends ChangeNotifier {
     }
     running = true;
     elapsed = Duration.zero;
+    quote = null;
     notifyListeners();
   }
 
   Future<void> _startLocal({required bool speak}) async {
-    final clock = SessionClock(interval: sessionInterval);
+    final clock = SessionClock();
     _clock = clock;
+    final announcer = SessionAnnouncer();
     Speaker? speaker;
     clock.start();
     running = true;
     elapsed = Duration.zero;
+    quote = null;
     notifyListeners();
     _ticker = Timer.periodic(const Duration(milliseconds: 200), (_) {
       elapsed = clock.elapsed;
+      final lines = announcer.takePending(clock);
+      quote = announcer.quote;
       notifyListeners();
-      final minute = clock.takePendingMinute();
-      if (minute != null && speaker != null) {
-        unawaited(speaker.speak(minuteCopy(minute)));
+      if (lines.isNotEmpty && speaker != null) {
+        unawaited(speaker.speakBurst(lines));
       }
     });
     if (speak) {
@@ -191,8 +198,10 @@ class SessionController extends ChangeNotifier {
     final map = Map<String, dynamic>.from(data);
     final nextRunning = map['running'] as bool? ?? running;
     final ms = (map['elapsedMs'] as num?)?.toInt() ?? elapsed.inMilliseconds;
+    final nextQuote = map['quote'] as String?;
     running = nextRunning;
     elapsed = Duration(milliseconds: ms);
+    quote = (nextQuote == null || nextQuote.isEmpty) ? null : nextQuote;
     notifyListeners();
   }
 }

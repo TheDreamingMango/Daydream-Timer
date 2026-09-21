@@ -53,4 +53,14 @@ void main() {
       Brightness.light,
     );
   });
+
+  testWidgets('shows the current quote while running', (tester) async {
+    final controller = SessionController(usePlatform: false);
+    addTearDown(controller.dispose);
+    controller.running = true;
+    controller.quote = 'Unclench your jaw.';
+    await tester.pumpWidget(StopDaydreamingApp(controller: controller));
+    expect(find.byKey(const Key('quote')), findsOneWidget);
+    expect(find.text('Unclench your jaw.'), findsOneWidget);
+  });
 }

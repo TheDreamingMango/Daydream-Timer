@@ -4,9 +4,8 @@ import 'dart:ui';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
-import 'minute_copy.dart';
+import 'session_announcer.dart';
 import 'session_clock.dart';
-import 'session_interval.dart';
 import 'speaker.dart';
 
 /// Top-level entry for the Android foreground-service isolate.
@@ -17,8 +16,9 @@ void startCallback() {
 
 /// Owns the clock and TTS while the Android foreground service is alive.
 class SessionTaskHandler extends TaskHandler {
-  final SessionClock _clock = SessionClock(interval: sessionInterval);
+  final SessionClock _clock = SessionClock();
   final Speaker _speaker = Speaker();
+  final SessionAnnouncer _announcer = SessionAnnouncer();
   int _lastNotifiedSecond = -1;
 
   @override
@@ -37,6 +37,7 @@ class SessionTaskHandler extends TaskHandler {
   @override
   void onRepeatEvent(DateTime timestamp) {
     if (!_clock.isRunning) return;
+    final lines = _announcer.takePending(_clock);
     _broadcast();
     final elapsed = _clock.elapsed;
     final second = elapsed.inSeconds;
@@ -47,9 +48,8 @@ class SessionTaskHandler extends TaskHandler {
         notificationText: 'running  ${formatElapsed(elapsed)}',
       );
     }
-    final minute = _clock.takePendingMinute();
-    if (minute != null) {
-      unawaited(_speaker.speak(minuteCopy(minute)));
+    if (lines.isNotEmpty) {
+      unawaited(_speaker.speakBurst(lines));
     }
   }
 
@@ -60,6 +60,7 @@ class SessionTaskHandler extends TaskHandler {
     FlutterForegroundTask.sendDataToMain({
       'running': false,
       'elapsedMs': 0,
+      'quote': '',
     });
   }
 
@@ -67,6 +68,7 @@ class SessionTaskHandler extends TaskHandler {
     FlutterForegroundTask.sendDataToMain({
       'running': _clock.isRunning,
       'elapsedMs': _clock.elapsed.inMilliseconds,
+      'quote': _announcer.quote ?? '',
     });
   }
 }
