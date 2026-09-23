@@ -177,6 +177,10 @@ class _TimerScreenState extends State<TimerScreen> {
                           ),
                         ),
                       ),
+                      if (!running) ...[
+                        const SizedBox(height: 16),
+                        const _Disclaimer(),
+                      ],
                     ],
                   ),
                 ),
@@ -184,6 +188,31 @@ class _TimerScreenState extends State<TimerScreen> {
             },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _Disclaimer extends StatelessWidget {
+  const _Disclaimer();
+
+  static const text =
+      'Daydream Timer is a grounding and time-awareness tool. '
+      'It does not diagnose, treat, or cure any condition and is not a '
+      'substitute for qualified professional care.';
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppPalette.of(context);
+    return Text(
+      text,
+      key: const Key('disclaimer'),
+      textAlign: TextAlign.center,
+      style: _mono(
+        color: palette.muted,
+        size: 12,
+        height: 1.45,
+        letterSpacing: 0.1,
       ),
     );
   }

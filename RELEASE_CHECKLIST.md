@@ -19,4 +19,6 @@
 
 - [ ] Publish a privacy page describing the app's local-first behavior and any data handling.
 - [ ] Publish a support/contact page.
-- [ ] Review store and in-app wording so the app is presented as a mindfulness/wellness tool, not medical treatment.
+- [x] Show this disclaimer on the timer screen while the session is stopped: “Daydream Timer is a grounding and time-awareness tool. It does not diagnose, treat, or cure any condition and is not a substitute for qualified professional care.”
+- [ ] Use that same disclaimer in the App Store and Play descriptions.
+- [ ] Review the rest of the store and in-app wording so the app is presented as a mindfulness/wellness tool, not medical treatment.

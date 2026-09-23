@@ -12,6 +12,7 @@ void main() {
     final elapsed = tester.widget<Semantics>(find.byKey(const Key('elapsed')));
     expect(elapsed.properties.label, '00:00');
     expect(find.text('stopped'), findsOneWidget);
+    expect(find.byKey(const Key('disclaimer')), findsOneWidget);
   });
 
   testWidgets('tap the clock starts the session', (tester) async {
@@ -22,6 +23,7 @@ void main() {
     await tester.pump();
     expect(find.text('running'), findsOneWidget);
     expect(find.text('stopped'), findsNothing);
+    expect(find.byKey(const Key('disclaimer')), findsNothing);
     await controller.stop();
   });
 
