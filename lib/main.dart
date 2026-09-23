@@ -11,20 +11,20 @@ Future<void> main() async {
   FlutterForegroundTask.initCommunicationPort();
   final themeController = ThemeController();
   await themeController.load();
-  runApp(StopDaydreamingApp(themeController: themeController));
+  runApp(DaydreamTimerApp(themeController: themeController));
 }
 
-class StopDaydreamingApp extends StatefulWidget {
-  const StopDaydreamingApp({super.key, this.controller, this.themeController});
+class DaydreamTimerApp extends StatefulWidget {
+  const DaydreamTimerApp({super.key, this.controller, this.themeController});
 
   final SessionController? controller;
   final ThemeController? themeController;
 
   @override
-  State<StopDaydreamingApp> createState() => _StopDaydreamingAppState();
+  State<DaydreamTimerApp> createState() => _DaydreamTimerAppState();
 }
 
-class _StopDaydreamingAppState extends State<StopDaydreamingApp> {
+class _DaydreamTimerAppState extends State<DaydreamTimerApp> {
   late final ThemeController _theme;
   late final bool _ownsTheme;
 

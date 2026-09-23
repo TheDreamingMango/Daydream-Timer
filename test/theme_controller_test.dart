@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stop_daydreaming/theme_controller.dart';
+import 'package:daydream_timer/theme_controller.dart';
 
 void main() {
   test('toggle flips dark to light and back', () {

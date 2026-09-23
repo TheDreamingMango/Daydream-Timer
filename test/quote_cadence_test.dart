@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stop_daydreaming/quote_cadence.dart';
+import 'package:daydream_timer/quote_cadence.dart';
 
 void main() {
   test('every minute through fifteen', () {

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stop_daydreaming/main.dart';
-import 'package:stop_daydreaming/session_controller.dart';
-import 'package:stop_daydreaming/theme_controller.dart';
+import 'package:daydream_timer/main.dart';
+import 'package:daydream_timer/session_controller.dart';
+import 'package:daydream_timer/theme_controller.dart';
 
 void main() {
   testWidgets('shows 00:00 and stopped', (tester) async {
     final controller = SessionController(usePlatform: false);
     addTearDown(controller.dispose);
-    await tester.pumpWidget(StopDaydreamingApp(controller: controller));
+    await tester.pumpWidget(DaydreamTimerApp(controller: controller));
     final elapsed = tester.widget<Semantics>(find.byKey(const Key('elapsed')));
     expect(elapsed.properties.label, '00:00');
     expect(find.text('stopped'), findsOneWidget);
@@ -17,7 +17,7 @@ void main() {
   testWidgets('tap the clock starts the session', (tester) async {
     final controller = SessionController(usePlatform: false);
     addTearDown(controller.dispose);
-    await tester.pumpWidget(StopDaydreamingApp(controller: controller));
+    await tester.pumpWidget(DaydreamTimerApp(controller: controller));
     await tester.tap(find.byKey(const Key('clock-frame')));
     await tester.pump();
     expect(find.text('running'), findsOneWidget);
@@ -33,7 +33,7 @@ void main() {
     addTearDown(controller.dispose);
     addTearDown(theme.dispose);
     await tester.pumpWidget(
-      StopDaydreamingApp(controller: controller, themeController: theme),
+      DaydreamTimerApp(controller: controller, themeController: theme),
     );
 
     expect(theme.mode, ThemeMode.dark);
@@ -59,7 +59,7 @@ void main() {
     addTearDown(controller.dispose);
     controller.running = true;
     controller.quote = 'Unclench your jaw.';
-    await tester.pumpWidget(StopDaydreamingApp(controller: controller));
+    await tester.pumpWidget(DaydreamTimerApp(controller: controller));
     expect(find.byKey(const Key('quote')), findsOneWidget);
     expect(find.text('Unclench your jaw.'), findsOneWidget);
   });

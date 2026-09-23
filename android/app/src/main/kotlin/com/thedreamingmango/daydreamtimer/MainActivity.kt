@@ -1,4 +1,4 @@
-package com.example.stop_daydreaming
+package com.thedreamingmango.daydreamtimer
 
 import io.flutter.embedding.android.FlutterActivity
 

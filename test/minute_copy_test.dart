@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stop_daydreaming/minute_copy.dart';
+import 'package:daydream_timer/minute_copy.dart';
 
 void main() {
   test('one minute is singular', () {

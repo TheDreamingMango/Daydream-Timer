@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stop_daydreaming/quote_player.dart';
-import 'package:stop_daydreaming/quotes.dart';
+import 'package:daydream_timer/quote_player.dart';
+import 'package:daydream_timer/quotes.dart';
 
 void main() {
   test('walks in order and loops', () {

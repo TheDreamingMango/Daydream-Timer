@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stop_daydreaming/session_clock.dart';
+import 'package:daydream_timer/session_clock.dart';
 
 void main() {
   test('stopped elapsed is always zero', () {

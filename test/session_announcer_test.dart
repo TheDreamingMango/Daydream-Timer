@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stop_daydreaming/quote_player.dart';
-import 'package:stop_daydreaming/session_announcer.dart';
-import 'package:stop_daydreaming/session_clock.dart';
+import 'package:daydream_timer/quote_player.dart';
+import 'package:daydream_timer/session_announcer.dart';
+import 'package:daydream_timer/session_clock.dart';
 
 void main() {
   test('minute then quote at two minutes', () {

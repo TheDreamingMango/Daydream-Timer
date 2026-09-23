@@ -5,7 +5,7 @@ Minimal Flutter app for **Android** and **iOS**. One screen: tap the clock to st
 ## Run
 
 ```bash
-cd ~/Code/Stop-Daydreaming
+cd ~/Code/TheDreamingMango/Daydream-Timer
 export JAVA_HOME="/opt/homebrew/opt/openjdk/libexec/openjdk.jdk/Contents/Home"
 export ANDROID_HOME="/opt/homebrew/share/android-commandlinetools"
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
