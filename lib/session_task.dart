@@ -44,7 +44,7 @@ class SessionTaskHandler extends TaskHandler {
     if (second != _lastNotifiedSecond) {
       _lastNotifiedSecond = second;
       FlutterForegroundTask.updateService(
-        notificationTitle: 'stop daydreaming',
+        notificationTitle: 'daydream timer',
         notificationText: 'running  ${formatElapsed(elapsed)}',
       );
     }

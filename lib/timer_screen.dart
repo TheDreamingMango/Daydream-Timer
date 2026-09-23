@@ -119,7 +119,7 @@ class _TimerScreenState extends State<TimerScreen> {
                             child: Column(
                               children: [
                                 Text(
-                                  'stop daydreaming',
+                                  'daydream timer',
                                   style: _mono(
                                     color: running
                                         ? palette.accent

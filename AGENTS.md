@@ -1,4 +1,4 @@
-# Stop Daydreaming
+# Daydream Timer
 
 Mobile Flutter app (Android and iOS) that interrupts maladaptive daydreaming by making elapsed time impossible to ignore. Keep it fast, calm, local-first, and easy to understand.
 

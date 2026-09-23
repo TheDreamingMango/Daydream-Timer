@@ -50,7 +50,7 @@ class _StopDaydreamingAppState extends State<StopDaydreamingApp> {
         builder: (context, _) {
           return WithForegroundTask(
             child: MaterialApp(
-              title: 'Stop Daydreaming',
+              title: 'Daydream Timer',
               debugShowCheckedModeBanner: false,
               theme: AppTheme.light,
               darkTheme: AppTheme.dark,

@@ -147,7 +147,7 @@ class SessionController extends ChangeNotifier {
 
     final result = await FlutterForegroundTask.startService(
       serviceTypes: [ForegroundServiceTypes.mediaPlayback],
-      notificationTitle: 'stop daydreaming',
+      notificationTitle: 'daydream timer',
       notificationText: 'running  00:00',
       callback: startCallback,
     );
