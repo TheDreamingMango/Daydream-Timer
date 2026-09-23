@@ -168,6 +168,7 @@ class _TimerScreenState extends State<TimerScreen> {
                                   style: _mono(
                                     color: palette.muted,
                                     size: 15,
+                                    weight: FontWeight.w500,
                                     letterSpacing: 1.4,
                                   ),
                                 ),
@@ -303,9 +304,9 @@ class _QuoteLine extends StatelessWidget {
         fontFamily: 'IBMPlexMono',
         fontStyle: FontStyle.italic,
         color: color,
-        fontSize: 15,
+        fontSize: 16,
         height: 1.4,
-        fontWeight: FontWeight.w400,
+        fontWeight: FontWeight.w500,
       ),
     );
   }

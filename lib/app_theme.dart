@@ -24,7 +24,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   static const dark = AppPalette(
     bg: Color(0xFF0A0A0A),
-    muted: Color(0xFF6E6E6E),
+    muted: Color(0xFF9A9A9A),
     idleFill: Color(0xFF9A9A9A),
     idleLine: Color(0xFF3A3A3A),
     accent: Color(0xFF00E5C3),
@@ -35,7 +35,7 @@ class AppPalette extends ThemeExtension<AppPalette> {
 
   static const light = AppPalette(
     bg: Color(0xFFF3F0E8),
-    muted: Color(0xFF8A8478),
+    muted: Color(0xFF5F5A50),
     idleFill: Color(0xFF9A9488),
     idleLine: Color(0xFFD2CCC0),
     accent: Color(0xFF0C7F70),
