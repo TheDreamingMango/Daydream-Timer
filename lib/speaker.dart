@@ -4,7 +4,7 @@ import 'dart:io' show Platform;
 import 'package:audio_session/audio_session.dart';
 import 'package:flutter_tts/flutter_tts.dart';
 
-/// Serial spoken announcements. Ducks other audio only for each burst.
+/// Serial spoken announcements. Other audio yields only for each burst.
 class Speaker {
   FlutterTts? _tts;
   AudioSession? _session;
@@ -18,13 +18,25 @@ class Speaker {
     await tts.awaitSpeakCompletion(true);
     await tts.setLanguage('en-US');
     if (Platform.isIOS) {
-      await tts.setSharedInstance(true);
-      await tts.setIosAudioCategory(IosTextToSpeechAudioCategory.playback, [
-        IosTextToSpeechAudioCategoryOptions.duckOthers,
-        IosTextToSpeechAudioCategoryOptions
-            .interruptSpokenAudioAndMixWithOthers,
-      ], IosTextToSpeechAudioMode.voicePrompt);
-      await tts.autoStopSharedSession(true);
+      // No mix or duck options, so playback interrupts other media.
+      await tts.setIosAudioCategory(
+        IosTextToSpeechAudioCategory.playback,
+        const [],
+        IosTextToSpeechAudioMode.voicePrompt,
+      );
+      // Keep the session up for a minute+quote burst; we deactivate it below.
+      await tts.autoStopSharedSession(false);
+      final session = await AudioSession.instance;
+      await session.configure(
+        const AudioSessionConfiguration(
+          avAudioSessionCategory: AVAudioSessionCategory.playback,
+          avAudioSessionCategoryOptions: AVAudioSessionCategoryOptions.none,
+          avAudioSessionMode: AVAudioSessionMode.voicePrompt,
+          avAudioSessionSetActiveOptions:
+              AVAudioSessionSetActiveOptions.notifyOthersOnDeactivation,
+        ),
+      );
+      _session = session;
     } else if (Platform.isAndroid) {
       final session = await AudioSession.instance;
       await session.configure(
@@ -50,7 +62,7 @@ class Speaker {
 
   Future<void> speak(String text) => speakBurst([text]);
 
-  /// Speaks [lines] in order under one duck so a minute + quote stay one burst.
+  /// Speaks [lines] in order under one interruption so a minute + quote stay one burst.
   Future<void> speakBurst(Iterable<String> lines) {
     if (_stopped) return Future.value();
     final texts = [
@@ -75,6 +87,11 @@ class Speaker {
         }
       }
     } finally {
+      if (Platform.isIOS && _session != null) {
+        // didFinish fires while the synthesizer still owns I/O. Deactivating
+        // then fails, and the other app never gets the resume signal.
+        await Future<void>.delayed(const Duration(milliseconds: 500));
+      }
       await _setActive(false);
     }
   }

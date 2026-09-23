@@ -125,7 +125,9 @@ class SessionController extends ChangeNotifier {
         allowWakeLock: true,
         allowWifiLock: false,
         allowAutoRestart: false,
-        stopWithTask: true,
+        // Keep the service alive after the activity pauses so the timer
+        // continues while another app is in front.
+        stopWithTask: false,
       ),
     );
   }

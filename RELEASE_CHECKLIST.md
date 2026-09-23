@@ -11,8 +11,8 @@
 
 ## Store preparation
 
-- [ ] Add final app icons for iOS and Android.
-- [ ] Replace placeholder bundle/application IDs.
+- [x] Add final app icons for iOS and Android.
+- [x] Replace placeholder bundle/application IDs.
 - [ ] Configure production release signing for iOS and Android.
 
 ## Privacy and positioning
