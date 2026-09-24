@@ -33,7 +33,7 @@ The point is mindfulness of time passing — and of time lost — while daydream
 
 ## Current Shape
 
-One TUI screen (`lib/timer_screen.dart`): tap the clock frame to start/stop. `SessionClock` is Stopwatch-based and resets on stop. Spoken minutes and quotes come from `Speaker` (`flutter_tts` + `audio_session` ducking) via `SessionAnnouncer`. On Android, clock+TTS live in a `mediaPlayback` foreground-service isolate (`lib/session_task.dart`). On iOS, they run in the UI isolate with `audio` background mode and no silent keep-alive loop.
+One TUI screen (`lib/timer_screen.dart`): tap the clock frame to start/stop. `SessionClock` is Stopwatch-based and resets on stop. Spoken minutes and quotes come from `Speaker` (`flutter_tts` + `audio_session` ducking) via `SessionAnnouncer`. On Android, clock+TTS live in a `mediaPlayback` foreground-service isolate (`lib/session_task.dart`). On iOS, they run in the UI isolate with `audio` background mode and no silent keep-alive loop. While a session is running, a Live Activity shows the elapsed time on the lock screen and in the Dynamic Island (iOS 16.2+). It starts and ends with the session.
 
 The first three days from install are free (`AccessController`). After that, starting the timer opens a paywall for the non-consumable `daydream_timer_unlock`. The price comes from the store. A purchase is remembered on device and can be restored.
 

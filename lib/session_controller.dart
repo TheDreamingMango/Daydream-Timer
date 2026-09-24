@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 
+import 'lock_screen_clock.dart';
 import 'session_announcer.dart';
 import 'session_clock.dart';
 import 'session_task.dart';
@@ -12,9 +13,11 @@ import 'speaker.dart';
 /// UI-facing session. Android hosts clock+TTS in the FGS isolate; iOS (and
 /// tests) run them in this isolate.
 class SessionController extends ChangeNotifier {
-  SessionController({this.usePlatform = true});
+  SessionController({this.usePlatform = true, this.lockScreen});
 
   final bool usePlatform;
+  final LockScreenClock? lockScreen;
+  IosLockScreenClock? _iosLockScreen;
 
   bool running = false;
   Duration elapsed = Duration.zero;
@@ -28,8 +31,12 @@ class SessionController extends ChangeNotifier {
   Timer? _ticker;
 
   Future<void> attach() async {
-    if (_attached || !usePlatform || !Platform.isAndroid) return;
+    if (_attached) return;
     _attached = true;
+    if (lockScreen != null || (usePlatform && Platform.isIOS)) {
+      await _activeLockScreen?.end();
+    }
+    if (!usePlatform || !Platform.isAndroid) return;
     FlutterForegroundTask.addTaskDataCallback(_onTaskData);
     _initService();
     if (await FlutterForegroundTask.isRunningService) {
@@ -62,6 +69,7 @@ class SessionController extends ChangeNotifier {
         await _startLocal(speak: true);
       }
     } catch (e) {
+      await _activeLockScreen?.end();
       error = 'could not start';
       running = false;
       elapsed = Duration.zero;
@@ -87,6 +95,7 @@ class SessionController extends ChangeNotifier {
     } catch (_) {
       // Still reset the UI.
     } finally {
+      await _activeLockScreen?.end();
       running = false;
       elapsed = Duration.zero;
       quote = null;
@@ -103,7 +112,15 @@ class SessionController extends ChangeNotifier {
       FlutterForegroundTask.removeTaskDataCallback(_onTaskData);
     }
     unawaited(_speaker?.stop());
+    unawaited(_activeLockScreen?.end());
     super.dispose();
+  }
+
+  LockScreenClock? get _activeLockScreen {
+    final injected = lockScreen;
+    if (injected != null) return injected;
+    if (!usePlatform || !Platform.isIOS) return null;
+    return _iosLockScreen ??= IosLockScreenClock();
   }
 
   void _initService() {
@@ -170,11 +187,13 @@ class SessionController extends ChangeNotifier {
     _clock = clock;
     final announcer = SessionAnnouncer();
     Speaker? speaker;
+    final startedAt = DateTime.now();
     clock.start();
     running = true;
     elapsed = Duration.zero;
     quote = null;
     notifyListeners();
+    final lockStart = _activeLockScreen?.start(startedAt);
     _ticker = Timer.periodic(const Duration(milliseconds: 200), (_) {
       elapsed = clock.elapsed;
       final lines = announcer.takePending(clock);
@@ -192,6 +211,11 @@ class SessionController extends ChangeNotifier {
       } catch (_) {
         // Clock still runs if TTS is missing.
       }
+    }
+    try {
+      await lockStart;
+    } catch (_) {
+      // The in-app clock still runs if the lock screen cannot start.
     }
   }
 
