@@ -21,7 +21,7 @@ The point is mindfulness of time passing — and of time lost — while daydream
 - Quotes are verbatim bundled lines. Every two minutes through 15:00, then 16:30, then every two minutes. Loop the list; do not skip the minute announcement.
 - The timer survives backgrounding, screen lock, and other apps in the foreground. A timer that only speaks while this app is visible has failed.
 - Other audio is interrupted only for the announcement, then restored right away.
-- Start/stop should be obvious and one tap. No accounts, no cloud, no network requirement.
+- Start/stop should be obvious and one tap. No accounts, no cloud. The timer works offline. The first three days are free; after that a one-time store unlock is required to start again.
 
 ## Working Agreements
 
@@ -34,6 +34,8 @@ The point is mindfulness of time passing — and of time lost — while daydream
 ## Current Shape
 
 One TUI screen (`lib/timer_screen.dart`): tap the clock frame to start/stop. `SessionClock` is Stopwatch-based and resets on stop. Spoken minutes and quotes come from `Speaker` (`flutter_tts` + `audio_session` ducking) via `SessionAnnouncer`. On Android, clock+TTS live in a `mediaPlayback` foreground-service isolate (`lib/session_task.dart`). On iOS, they run in the UI isolate with `audio` background mode and no silent keep-alive loop.
+
+The first three days from install are free (`AccessController`). After that, starting the timer opens a paywall for the non-consumable `daydream_timer_unlock`. The price comes from the store. A purchase is remembered on device and can be restored.
 
 ## Verification
 

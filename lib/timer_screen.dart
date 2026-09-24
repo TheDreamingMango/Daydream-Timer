@@ -1,15 +1,20 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'access_controller.dart';
 import 'app_theme.dart';
+import 'paywall.dart';
 import 'session_clock.dart';
 import 'session_controller.dart';
 import 'theme_controller.dart';
 
 class TimerScreen extends StatefulWidget {
-  const TimerScreen({super.key, this.controller});
+  const TimerScreen({super.key, this.controller, this.access});
 
   final SessionController? controller;
+  final AccessController? access;
 
   @override
   State<TimerScreen> createState() => _TimerScreenState();
@@ -17,12 +22,18 @@ class TimerScreen extends StatefulWidget {
 
 class _TimerScreenState extends State<TimerScreen> {
   late final SessionController _controller;
+  late final AccessController _access;
+  late final bool _ownsAccess;
+  var _paywallOpen = false;
 
   @override
   void initState() {
     super.initState();
     _controller = widget.controller ?? SessionController();
+    _ownsAccess = widget.access == null;
+    _access = widget.access ?? AccessController(persist: false);
     _controller.addListener(_onChange);
+    _access.addListener(_onChange);
     _controller.attach();
     SystemChrome.setPreferredOrientations(const [DeviceOrientation.portraitUp]);
   }
@@ -36,9 +47,11 @@ class _TimerScreenState extends State<TimerScreen> {
   @override
   void dispose() {
     _controller.removeListener(_onChange);
+    _access.removeListener(_onChange);
     if (widget.controller == null) {
       _controller.dispose();
     }
+    if (_ownsAccess) _access.dispose();
     super.dispose();
   }
 
@@ -46,9 +59,23 @@ class _TimerScreenState extends State<TimerScreen> {
     if (mounted) setState(() {});
   }
 
-  void _toggle() {
+  Future<void> _toggle() async {
     HapticFeedback.lightImpact();
-    _controller.toggle();
+    if (_controller.running) {
+      await _controller.toggle();
+      return;
+    }
+    if (!_access.canStart) {
+      if (_paywallOpen) return;
+      _paywallOpen = true;
+      unawaited(_access.preparePaywall());
+      await Navigator.of(
+        context,
+      ).push(MaterialPageRoute<void>(builder: (_) => Paywall(access: _access)));
+      _paywallOpen = false;
+      if (!mounted || !_access.canStart || _controller.running) return;
+    }
+    await _controller.toggle();
   }
 
   void _syncSystemUi(AppPalette palette) {
@@ -178,6 +205,19 @@ class _TimerScreenState extends State<TimerScreen> {
                         ),
                       ),
                       if (!running) ...[
+                        if (_access.trialLabel != null) ...[
+                          const SizedBox(height: 14),
+                          Text(
+                            _access.trialLabel!,
+                            key: const Key('trial-remaining'),
+                            textAlign: TextAlign.center,
+                            style: _mono(
+                              color: palette.muted,
+                              size: 13,
+                              letterSpacing: 0.6,
+                            ),
+                          ),
+                        ],
                         const SizedBox(height: 16),
                         const _Disclaimer(),
                       ],

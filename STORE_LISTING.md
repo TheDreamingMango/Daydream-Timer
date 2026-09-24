@@ -26,13 +26,16 @@ The timer keeps running when your screen is locked or another app is open. Becau
 
 This is a focused tool for a serious and often misunderstood problem—not a meditation course, habit tracker, or productivity game.
 
+The first three days are free. After that, a one-time unlock keeps the timer on your device.
+
 - One-tap start and stop
 - Spoken minute announcements
 - Brief grounding quotes
 - Works in the background
+- Three-day trial, then a one-time unlock
 - No account required
 - No ads
-- No internet connection required
+- The timer works offline
 - Your sessions stay on your device
 
 Daydream Timer is a grounding and time-awareness tool. It does not diagnose, treat, or cure any condition and is not a substitute for qualified professional care.
